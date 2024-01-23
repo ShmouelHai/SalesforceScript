@@ -158,6 +158,4 @@ This Python script is designed to update an existing Excel file generated from t
 
 Shmouel Illouz
 
----
 
-N'hésite pas à ajuster le contenu selon tes besoins.
