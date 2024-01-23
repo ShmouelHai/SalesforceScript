@@ -1,8 +1,6 @@
 # SalesforceScript
 some Tools to improve Hyperforce Projects
 
-Bien sûr, voici une version formatée en Markdown pour le fichier README.md :
-
 ---
 
 
@@ -61,10 +59,6 @@ Open the generated Excel file to review the audit report. The report includes in
 
 ---
 
-Bien sûr, voici la version formatée en Markdown pour le README.md :
-
----
-
 # Script 2: Metadata Comparison Script
 
 ## Overview
@@ -113,9 +107,6 @@ This Python script allows you to compare metadata between two Salesforce orgs by
   - `NOT OK`: The metadata member is either missing or not supported as per SFOA.
 
 ---
-
-N'oublie pas de personnaliser la section "Author" avec le nom de l'auteur du script. Si tu as d'autres informations spécifiques que tu souhaites ajouter, n'hésite pas à le faire.
-
 
 
 ## Author
