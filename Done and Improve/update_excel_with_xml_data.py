@@ -1,3 +1,5 @@
+# By Shmouel Illouz : Being lazy is knowing how to write scripts.
+
 import openpyxl
 import xml.etree.ElementTree as ET
 import pandas as pd
@@ -18,18 +20,17 @@ def find_sheet_with_most_rows(workbook):
 
     return sheet_with_most_rows
 
-def ajouter_elements_manquants(workbook, selected_sheet, column_A, list_to_compare, listeDeListes):
+def add_missing_elements(workbook, selected_sheet, column_A, list_to_compare, list_of_lists):
     sheet = workbook[selected_sheet]
 
+    # Check for missing elements
+    missing_elements = [element for element in list_to_compare if element not in column_A]
 
-    # Vérifier les éléments manquants
-    elements_manquants = [element for element in list_to_compare if element not in column_A]
-
-    if elements_manquants:
-        # Ajouter les éléments manquants à la fin de la colonne A
+    if missing_elements:
+        # Add missing elements to the end of column A
         last_row = sheet.max_row + 1
-        for element in elements_manquants:
-            for details in listeDeListes:
+        for element in missing_elements:
+            for details in list_of_lists:
                 if details[0] == element:
                     sheet.cell(row=last_row, column=1, value=details[0])
                     sheet.cell(row=last_row, column=2, value=details[1])
@@ -37,101 +38,98 @@ def ajouter_elements_manquants(workbook, selected_sheet, column_A, list_to_compa
                     sheet.cell(row=last_row, column=4, value="added")
                     last_row += 1
 
-        print(f"Les éléments {elements_manquants} ont été ajoutés à la fin de la colonne A.")
+        print(f"The elements {missing_elements} have been added to the end of column A.")
     else:
-        print("Aucun élément manquant trouvé.")
+        print("No missing elements found.")
 
+# ******************************* MAIN ***********************************
 
-#******************************* MAIN ***********************************
+# Ask the user for the Excel file path
+excel_file_path = input("Please enter the path of the Excel file: ")
 
-# Demander le chemin du fichier Excel à l'utilisateur
-excel_file_path = input("Veuillez entrer le chemin du fichier Excel : ")
-
-# Charger le fichier Excel
+# Load the Excel file
 workbook = openpyxl.load_workbook(excel_file_path)
 
-# Trouver le sheet avec le plus grand nombre de lignes
+# Find the sheet with the most rows
 selected_sheet = find_sheet_with_most_rows(workbook)
-
-
 
 if selected_sheet:
     sheet = workbook[selected_sheet]
 
-    # Récupérer toutes les valeurs de la colonne A dans une liste
+    # Retrieve all values from column A into a list
     column_A = [cell.value for cell in sheet['A']]
 
-    # Liste à comparer
-    xml_file_path = input("Entrez le chemin du fichier XML : ")
+    # List to compare
+    xml_file_path = input("Enter the path of the XML file: ")
     # Parsing XML
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
-    membersToRemove = ["et4ae5", "due__", "Google", "OSF_", "twilio", "odigo", "Didenjoy", "IndividualEmailResult", 
+    members_to_remove = ["et4ae5", "due__", "Google", "OSF_", "twilio", "odigo", "Didenjoy", "IndividualEmailResult", 
                        "ServiceTerritory", "ServiceResource", "SocialPost", "ServiceAppointment", "ResourceAbsence"
                        ,"WorkType", "SiqUserBlacklist", "SocialPost", "StreamActivity", "TableauHost", "UserEmailPreferred",
                        "VideoCall", "VoiceCall", "Waitlist"]
-    membersList = []
-    finalGrandList = []
-    finalGrandListMembers = []
-    statusMembersList = []
+    members_list = []
+    final_grand_list = []
+    final_grand_list_members = []
+    status_members_list = []
 
     df = pd.DataFrame()
 
-    # Chaque type est défini par un name
+    # Each type is defined by a name
     for types in root:
-        nameTypeList = ''
-        membersList = []
+        name_type_list = ''
+        members_list = []
         for elem in types:
             flag = 0
             elem_name = elem.tag.split('}')[-1]
             if elem_name == 'members':
-                membersList.append(elem.text)
-                for indesirables in membersToRemove:
-                    if indesirables in elem.text:
+                members_list.append(elem.text)
+                for undesirables in members_to_remove:
+                    if undesirables in elem.text:
                         flag = 1 
-                statusMembersList.append("Expected OK" if flag == 0 else "Not supported in SFOA")
+                status_members_list.append("Expected OK" if flag == 0 else "Not supported in SFOA")
             if elem_name == 'name':
-                nameTypeList = elem.text
+                name_type_list = elem.text
 
-        if nameTypeList == 'EmailTemplate':
-            statusMembersList[-len(membersList):] = ["Data Scope"] * len(membersList)
+        if name_type_list == 'EmailTemplate':
+            status_members_list[-len(members_list):] = ["Data Scope"] * len(members_list)
 
-        if nameTypeList == 'Report':
-            statusMembersList[-len(membersList):] = ["Scope To Define"] * len(membersList)
+        if name_type_list == 'Report':
+            status_members_list[-len(members_list):] = ["Scope To Define"] * len(members_list)
 
-        if nameTypeList == 'Dashboard':
-            statusMembersList[-len(membersList):] = ["Scope To Define"] * len(membersList)
+        if name_type_list == 'Dashboard':
+            status_members_list[-len(members_list):] = ["Scope To Define"] * len(members_list)
 
-        listeDeListes = []
+        list_of_lists = []
 
-        # Construction de finalGrandList après que statusMembersList a été construit 
-        for member in membersList:
-            finalGrandList.append(member)
-            finalGrandListMembers.append(nameTypeList)
+        # Building final_grand_list after status_members_list has been built
+        for member in members_list:
+            final_grand_list.append(member)
+            final_grand_list_members.append(name_type_list)
 
-    for i in range(len(finalGrandList)):
-        detailsMembre = [finalGrandList[i], finalGrandListMembers[i], statusMembersList[i]]
-        # Ajout de la sous-liste à la liste principale
-        listeDeListes.append(detailsMembre)
+    for i in range(len(final_grand_list)):
+        details_member = [final_grand_list[i], final_grand_list_members[i], status_members_list[i]]
+        # Adding the sublist to the main list
+        list_of_lists.append(details_member)
 
-    # Création d'un DataFrame Pandas
-    print("finalGrandList: " + str(len(finalGrandList)))
-    print("finalGrandListMembers: " + str(len(finalGrandListMembers)))
-    print("statusMembersList: " + str(len(statusMembersList)))
-    print("listeDeListes: " + str(len(listeDeListes)))
+    # Creating a Pandas DataFrame
+    print("final_grand_list: " + str(len(final_grand_list)))
+    print("final_grand_list_members: " + str(len(final_grand_list_members)))
+    print("status_members_list: " + str(len(status_members_list)))
+    print("list_of_lists: " + str(len(list_of_lists)))
 
-    # df = pd.DataFrame({"Members": finalGrandList, "Type": finalGrandListMembers  , "SFOA Status": statusMembersList}) 
+    # df = pd.DataFrame({"Members": final_grand_list, "Type": final_grand_list_members  , "SFOA Status": status_members_list}) 
 
-    list_to_compare = finalGrandList  # Remplace cela par ta propre liste
+    list_to_compare = final_grand_list  # Replace this with your own list
 
-    # Comparer les listes et ajouter les éléments manquants
-    ajouter_elements_manquants(workbook, selected_sheet, column_A, list_to_compare, listeDeListes)
+    # Compare the lists and add missing elements
+    add_missing_elements(workbook, selected_sheet, column_A, list_to_compare, list_of_lists)
 
-    # Sauvegarder les modifications dans le fichier Excel
+    # Save the modifications to the Excel file
     workbook.save(excel_file_path)
-    print("Les modifications ont été sauvegardées.")
+    print("Modifications have been saved.")
 else:
-    print("Aucun sheet trouvé.")
+    print("No sheet found.")
 
-# Fermer le fichier Excel
+# Close the Excel file
 workbook.close()
