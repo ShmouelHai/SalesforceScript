@@ -1,81 +1,135 @@
+# By Shmouel Illouz : Being lazy is knowing how to write scripts.
+
+import openpyxl
 import xml.etree.ElementTree as ET
 import pandas as pd
 import os
-from datetime import datetime
 
-if __name__ == "__main__":
-    # Demande à l'utilisateur de fournir le chemin du fichier XML
-    print("If the output excel is open please close it before launch the script")
-    xml_file_path = input("Entrez le chemin du fichier XML : ")
+def find_sheet_with_most_rows(workbook):
+    sheets = workbook.sheetnames
+    sheet_with_most_rows = None
+    max_rows = 0
 
+    for sheet_name in sheets:
+        sheet = workbook[sheet_name]
+        num_rows = sheet.max_row
+
+        if num_rows > max_rows:
+            max_rows = num_rows
+            sheet_with_most_rows = sheet_name
+
+    return sheet_with_most_rows
+
+def add_missing_elements(workbook, selected_sheet, column_A, list_to_compare, list_of_lists):
+    sheet = workbook[selected_sheet]
+
+    # Check for missing elements
+    missing_elements = [element for element in list_to_compare if element not in column_A]
+
+    if missing_elements:
+        # Add missing elements to the end of column A
+        last_row = sheet.max_row + 1
+        for element in missing_elements:
+            for details in list_of_lists:
+                if details[0] == element:
+                    sheet.cell(row=last_row, column=1, value=details[0])
+                    sheet.cell(row=last_row, column=2, value=details[1])
+                    sheet.cell(row=last_row, column=3, value=details[2])
+                    sheet.cell(row=last_row, column=4, value="added")
+                    last_row += 1
+
+        print(f"The elements {missing_elements} have been added to the end of column A.")
+    else:
+        print("No missing elements found.")
+
+# ******************************* MAIN ***********************************
+
+# Ask the user for the Excel file path
+excel_file_path = input("Please enter the path of the Excel file: ")
+
+# Load the Excel file
+workbook = openpyxl.load_workbook(excel_file_path)
+
+# Find the sheet with the most rows
+selected_sheet = find_sheet_with_most_rows(workbook)
+
+if selected_sheet:
+    sheet = workbook[selected_sheet]
+
+    # Retrieve all values from column A into a list
+    column_A = [cell.value for cell in sheet['A']]
+
+    # List to compare
+    xml_file_path = input("Enter the path of the XML file: ")
     # Parsing XML
     tree = ET.parse(xml_file_path)
     root = tree.getroot()
-    membersToRemove = ["et4ae5", "due__", "Google", "OSF_", "twilio", "odigo", "Didenjoy", "IndividualEmailResult", 
+    members_to_remove = ["et4ae5", "due__", "Google", "OSF_", "twilio", "odigo", "Didenjoy", "IndividualEmailResult", 
                        "ServiceTerritory", "ServiceResource", "SocialPost", "ServiceAppointment", "ResourceAbsence"
                        ,"WorkType", "SiqUserBlacklist", "SocialPost", "StreamActivity", "TableauHost", "UserEmailPreferred",
                        "VideoCall", "VoiceCall", "Waitlist"]
-    membersList = []
-    finalGrandList = []
-    finalGrandListMembers = []
-    statusMembersList = []
+    members_list = []
+    final_grand_list = []
+    final_grand_list_members = []
+    status_members_list = []
 
     df = pd.DataFrame()
 
-    # Chaque type est défini par un name
+    # Each type is defined by a name
     for types in root:
-        nameTypeList = ''
-        membersList = []
+        name_type_list = ''
+        members_list = []
         for elem in types:
             flag = 0
             elem_name = elem.tag.split('}')[-1]
             if elem_name == 'members':
-                membersList.append(elem.text)
-                for indesirables in membersToRemove:
-                    if indesirables in elem.text:
+                members_list.append(elem.text)
+                for undesirables in members_to_remove:
+                    if undesirables in elem.text:
                         flag = 1 
-                statusMembersList.append("Expected OK" if flag == 0 else "Not supported in SFOA")
+                status_members_list.append("Expected OK" if flag == 0 else "Not supported in SFOA")
             if elem_name == 'name':
-                nameTypeList = elem.text
+                name_type_list = elem.text
 
-        if nameTypeList == 'EmailTemplate':
-            statusMembersList[-len(membersList):] = ["Data Scope"] * len(membersList)
+        if name_type_list == 'EmailTemplate':
+            status_members_list[-len(members_list):] = ["Data Scope"] * len(members_list)
 
-        if nameTypeList == 'Report':
-            statusMembersList[-len(membersList):] = ["Scope To Define"] * len(membersList)
+        if name_type_list == 'Report':
+            status_members_list[-len(members_list):] = ["Scope To Define"] * len(members_list)
 
-        if nameTypeList == 'Dashboard':
-            statusMembersList[-len(membersList):] = ["Scope To Define"] * len(membersList)
+        if name_type_list == 'Dashboard':
+            status_members_list[-len(members_list):] = ["Scope To Define"] * len(members_list)
 
-        # Construction de finalGrandList après que statusMembersList a été construit 
-        for member in membersList:
-            finalGrandList.append(member)
-            finalGrandListMembers.append(nameTypeList)
+        list_of_lists = []
 
+        # Building final_grand_list after status_members_list has been built
+        for member in members_list:
+            final_grand_list.append(member)
+            final_grand_list_members.append(name_type_list)
 
-    # Création d'un DataFrame Pandas
-    print("finalGrandList: " + str(len(finalGrandList)))
-    print("finalGrandListMembers: " + str(len(finalGrandListMembers)))
-    print("statusMembersList: " + str(len(statusMembersList)))
-    
-    df = pd.DataFrame({"Members": finalGrandList, "Type": finalGrandListMembers  , "SFOA Status": statusMembersList}) #,"Reason": ReasonList, "Comments": emptyString
+    for i in range(len(final_grand_list)):
+        details_member = [final_grand_list[i], final_grand_list_members[i], status_members_list[i]]
+        # Adding the sublist to the main list
+        list_of_lists.append(details_member)
 
+    # Creating a Pandas DataFrame
+    print("final_grand_list: " + str(len(final_grand_list)))
+    print("final_grand_list_members: " + str(len(final_grand_list_members)))
+    print("status_members_list: " + str(len(status_members_list)))
+    print("list_of_lists: " + str(len(list_of_lists)))
 
-    # Chemin du fichier Excel sur le bureau
-    desktop_path = os.path.join(os.path.expanduser("~"), "Desktop")
-    output_excel_path = os.path.join(desktop_path, "Audit.xlsx")
+    # df = pd.DataFrame({"Members": final_grand_list, "Type": final_grand_list_members  , "SFOA Status": status_members_list}) 
 
-    # Vérifier si le fichier Excel existe
-    if os.path.exists(output_excel_path):
-        # Charger le fichier Excel existant avec les feuilles existantes
-        with pd.ExcelWriter(output_excel_path, engine='openpyxl', mode='a') as writer:
-            # Ajouter le DataFrame comme une nouvelle feuille
-            unique_suffix = 'Sheet' + str(datetime.now().strftime("%d%H%M%S"))
-            df.to_excel(writer, sheet_name=unique_suffix , index=False)
-    else:
-        # Si le fichier Excel n'existe pas, simplement écrire le DataFrame
-        df.to_excel(output_excel_path, index=False)
+    list_to_compare = final_grand_list  # Replace this with your own list
 
-    print(f"Excel file '{output_excel_path}' updated successfully.")
-    # Ouvrir le fichier Excel
-    os.system(output_excel_path)
+    # Compare the lists and add missing elements
+    add_missing_elements(workbook, selected_sheet, column_A, list_to_compare, list_of_lists)
+
+    # Save the modifications to the Excel file
+    workbook.save(excel_file_path)
+    print("Modifications have been saved.")
+else:
+    print("No sheet found.")
+
+# Close the Excel file
+workbook.close()
