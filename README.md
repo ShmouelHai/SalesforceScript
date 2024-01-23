@@ -4,9 +4,9 @@ some Tools to improve Hyperforce Projects
 Bien sûr, voici une version formatée en Markdown pour le fichier README.md :
 
 ---
-Script 1
 
-# Metadata Audit Script
+
+# Script 1: Metadata Audit Script
 
 ## Overview
 
