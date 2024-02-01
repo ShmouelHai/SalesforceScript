@@ -27,10 +27,6 @@ Execute the script by running the following command in your terminal:
 python3 createExcelFromPackageXML.py
 ```
 
-### Input XML File
-
-Enter the path of the XML file when prompted.
-
 ### Output Excel File
 
 The script will generate an Excel file named `Audit.xlsx` on your desktop. If the file already exists, a new sheet with a timestamp will be added.
