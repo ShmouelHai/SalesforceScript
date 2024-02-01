@@ -25,8 +25,8 @@ This Python script allows you to compare metadata between two Salesforce orgs by
    ```
 
    Input Package Paths:
-   - Enter the path of the package to be compared (ROW) when prompted.
-   - Enter the path of the comparing package (SFOA).
+   - Enter the path of the package to be compared (generally ROW) when prompted.
+   - Enter the path of the comparing package (generally SFOA).
 
 4. **Review Excel Report:**
    Open the generated Excel file named `CompareXML.xlsx` on your desktop. The report provides a comprehensive overview of metadata members, their types, SFOA status, and deployment status.
