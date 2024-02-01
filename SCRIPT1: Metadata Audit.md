@@ -34,8 +34,8 @@ The script will generate an Excel file named `Audit.xlsx` on your desktop. If th
 ### Review Report
 
 Open the generated Excel file to review the audit report. The report includes information about metadata members, their types, and their SFOA status.
-You can create a Pivot Table to have a cleaner view. 
-***Pivot Table:*** Rows = "Type", Values = "Members", Columns = "SFOA Status"
+You can create a Pivot Table to have a cleaner view.
+*Pivot Table:* Rows = "Type", Values = "Members", Columns = "SFOA Status"
 
 ## Configuration
 
