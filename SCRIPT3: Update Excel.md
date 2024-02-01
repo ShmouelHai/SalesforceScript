@@ -25,7 +25,7 @@ This Python script is designed to update an existing Excel file generated from t
    Execute the script by running the following command in your terminal:
 
    ```bash
-   python3 update_excel_with_xml_data.py
+   python3 updateExcelWithXmlData.py
    ```
 
 5. **Review Console Output:**
