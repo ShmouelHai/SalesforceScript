@@ -40,10 +40,9 @@ This Python script allows you to compare metadata between two Salesforce orgs by
 - The script compares the SFOA status with the SFOA package to determine deployment status.
   - **Additional Note:**
     - For each metadata member in the comparing package (ROW), the script checks if it is present in the SFOA package. The result is recorded in the "SFOA package" column as either "In Package" or "Not in Package."
-
-- **Deployment Status:**
-  - `OK`: The metadata member is expected and in the SFOA package.
-  - `NOT OK`: The metadata member is either missing or not supported as per SFOA.
+  - **Deployment Status:**
+    - `OK`: The metadata member is expected and in the SFOA package.
+    - `NOT OK`: The metadata member is either missing or not supported as per SFOA.
 
 ---
 
