@@ -11,6 +11,8 @@ Ensure the following dependencies are installed:
 - Python 3.x
 - pandas library (`pip install pandas`)
 - openpyxl library (`pip install openpyxl`)
+- download the script from  the GitHub repository
+- launch it from the command line
 
 ## General Explanation
 
